@@ -1,8 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './components/app';
+import TipCalculator from './components/app';
 
 ReactDOM.render(
-  <App />,
+  <TipCalculator />,
   document.querySelector('#tip-calculator')
 );
