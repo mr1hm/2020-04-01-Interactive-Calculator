@@ -18,12 +18,14 @@ export default class TipCalculator extends Component {
       checkTotalSet: false,
       tipTotal: null,
       grandTotal: null,
+      fateDecides: false,
     };
     this.onTotalCostChange = this.onTotalCostChange.bind(this);
     this.onSetClick = this.onSetClick.bind(this);
     this.calculateGrandTotal = this.calculateGrandtotal.bind(this);
     this.handleTipPercentageClick = this.handleTipPercentageClick.bind(this);
     this.handleReset = this.handleReset.bind(this);
+    this.letFateDecide = this.letFateDecide.bind(this);
   }
 
   onTotalCostChange(e) {
@@ -32,31 +34,51 @@ export default class TipCalculator extends Component {
   }
 
   onSetClick() {
-    this.setState({ checkTotalSet: !this.state.checkTotalSet }, () => this.calculateGrandTotal(this.state.tipSelected));
+    this.setState({ checkTotalSet: !this.state.checkTotalSet }, () => {
+      if (this.state.fateDecides) {
+        const tipArr = this.state.tipSelected.split('');
+        tipArr.pop();
+        const tip = '0.' + tipArr.join();
+        this.calculateGrandTotal(tip)
+      }
+      else this.calculateGrandTotal(this.state.tipSelected)
+    })
   }
 
   handleReset() {
-    this.setState({ checkTotalSet: !this.state.checkTotalSet, tipTotal: null, grandTotal: null, checkTotal: '', tipSelected: null })
+    this.setState({ checkTotalSet: !this.state.checkTotalSet, tipTotal: null, grandTotal: null, checkTotal: '', tipSelected: null, fateDecides: false })
   }
 
   handleTipPercentageClick(e) {
-    const tipSelected = e.target.value;
-    this.setState({ tipSelected }, () => this.calculateGrandtotal(tipSelected));
+    if (this.state.fateDecides) {
+      const randomTip = Math.round(Math.random() * (40 - 15) + 15);
+      const percentage = '0.' + randomTip;
+      const tipSelected = percentage.split('.')[1] + '%';
+      this.setState({ tipSelected }, () => this.calculateGrandTotal(percentage))
+    } else {
+      const tipSelected = e.target.value;
+      this.setState({ tipSelected }, () => this.calculateGrandtotal(tipSelected));
+    }
+  }
+
+  letFateDecide(e) {
+    this.setState({ fateDecides: true }, () => this.handleTipPercentageClick())
   }
 
   calculateGrandtotal(tip) {
-    const { checkTotal, checkTotalSet, tipPercentage } = this.state;
-    console.log(tip);
-    if (checkTotal && checkTotalSet) {
+    const { checkTotal, checkTotalSet, tipPercentage, fateDecides } = this.state;
+    if (!fateDecides) {
       for (const key in tipPercentage) {
         if (key === tip) {
           const tipTotal = (tipPercentage[key] * checkTotal).toFixed(2);
           const grandTotal = parseFloat(tipTotal) + parseFloat(checkTotal);
-          console.log(tipTotal);
           this.setState({ tipTotal, grandTotal });
         }
       }
     } else {
+      const tipTotal = (parseFloat(tip) * checkTotal).toFixed(2);
+      const grandTotal = parseFloat(tipTotal) + parseFloat(checkTotal);
+      this.setState({ tipTotal, grandTotal });
       return;
     }
   }
@@ -76,6 +98,7 @@ export default class TipCalculator extends Component {
               {checkTotalSet ? <button onClick={this.handleReset}>RESET</button> : <button onClick={this.onSetClick}>SET</button>}
             </div>
           </section>
+          <hr />
           <section className="row tip-percentages">
             <div className="col d-flex">
               SELECT TIP PERCENTAGE: {tipSelected ? <i style={{ marginLeft: '0.5em' }}>{tipSelected}</i> : null}
@@ -90,6 +113,12 @@ export default class TipCalculator extends Component {
               );
             })}
           </section>
+          <section className="row fate">
+            <div className="col d-flex justify-content-center">
+              <button onClick={this.letFateDecide} className="btn btn-outline-dark">Let Fate Decide</button>
+            </div>
+          </section>
+          <hr />
           <section className="row tip-cost">
             <div className="col d-flex">
               TIP: {tipTotal ? <strong className="tip-total-cost">${tipTotal}</strong> : null}
