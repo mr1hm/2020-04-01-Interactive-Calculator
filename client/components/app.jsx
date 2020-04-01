@@ -77,7 +77,7 @@ export default class TipCalculator extends Component {
       }
     } else {
       const tipTotal = (parseFloat(tip) * checkTotal).toFixed(2);
-      const grandTotal = parseFloat(tipTotal) + parseFloat(checkTotal);
+      const grandTotal = (parseFloat(tipTotal) + parseFloat(checkTotal)).toFixed(2);
       this.setState({ tipTotal, grandTotal });
       return;
     }
